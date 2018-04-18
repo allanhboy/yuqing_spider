@@ -10,6 +10,8 @@ class Stock(scrapy.Item):
     url = scrapy.Field()
     company_name = scrapy.Field()
     short_name = scrapy.Field()
+    category1 = scrapy.Field()
+    category2 = scrapy.Field()
 
 
 class Article(scrapy.Item):

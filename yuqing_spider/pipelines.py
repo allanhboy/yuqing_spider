@@ -58,10 +58,12 @@ class MysqlStockPipeline(object):
         if isinstance(item, Stock):
             try:
                 with self.client.cursor() as cursor:
-                    sql = "INSERT IGNORE INTO `company`(`company_name`, `short_name`, `is_chinaipo`, `url`, `stock_id`) VALUES (%s,%s,%s,%s,%s)"
+                    sql = "INSERT IGNORE INTO `company`(`company_name`, `short_name`, `is_chinaipo`, `url`, `stock_id`, `category1`, `category2`) VALUES (%s,%s,%s,%s,%s,%s,%s)"
                     cursor.execute(
-                        sql, (item['company_name'], item['short_name'], True, item['url'], item['id']))
+                        sql, (item['company_name'], item['short_name'], True, item['url'], item['id'], item['category1'], item['category2']))
                 self.client.commit()
+            except Exception as e:
+                print('出问题了', e)
             finally:
                 return item
         else:
