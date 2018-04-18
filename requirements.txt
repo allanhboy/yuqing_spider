@@ -1,3 +1,5 @@
 scrapy
 scrapy_redis
 pymysql
+beautifulsoup4
+urllib3
