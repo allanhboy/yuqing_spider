@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import os
 
+env_dist = os.environ
 # Scrapy settings for yuqing_spider project
 #
 # For simplicity, this file contains only settings considered important or
@@ -94,13 +96,15 @@ ITEM_PIPELINES = {
 
 LOG_LEVEL = "INFO"
 
-STOCK_MYSQL_HOST = "101.37.179.99"
-STOCK_MYSQL_PASSWD = "djejeUJ3qj^su22"
-STOCK_MYSQL_DB = "yuqing"
 
-ARTICLE_MYSQL_HOST = "101.37.179.99"
-ARTICLE_MYSQL_PASSWD = "djejeUJ3qj^su22"
-ARTICLE_MYSQL_DB = "yuqing"
+
+STOCK_MYSQL_HOST = env_dist.get('STOCK_MYSQL_HOST')
+STOCK_MYSQL_PASSWD = env_dist.get('STOCK_MYSQL_PASSWD')
+STOCK_MYSQL_DB = env_dist.get('STOCK_MYSQL_DB')
+
+ARTICLE_MYSQL_HOST = env_dist.get('ARTICLE_MYSQL_HOST')
+ARTICLE_MYSQL_PASSWD = env_dist.get('ARTICLE_MYSQL_PASSWD')
+ARTICLE_MYSQL_DB = env_dist.get('ARTICLE_MYSQL_DB')
 
 # Enables scheduling storing requests queue in redis.
 SCHEDULER = "scrapy_redis.scheduler.Scheduler"
@@ -110,3 +114,5 @@ DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
 
 # Don't cleanup redis queues, allows to pause/resume crawls.
 SCHEDULER_PERSIST = True
+
+REDIS_URL = env_dist.get("REDIS_URL")
