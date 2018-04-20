@@ -21,10 +21,11 @@ class Article(scrapy.Item):
     title = scrapy.Field()
     description = scrapy.Field()
     publish_time = scrapy.Field()
-    tags = scrapy.Field()
     text = scrapy.Field()
     source_site = scrapy.Field()
     body = scrapy.Field()
+    companies = scrapy.Field()
+    industries = scrapy.Field()
     # 
     # url= scrapy.Field()
     # url= scrapy.Field()

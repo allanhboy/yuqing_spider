@@ -74,7 +74,7 @@ class ChinaipoNewsSpider(scrapy.Spider):
             news['publish_time'] = [x.strip() for x in soup.div.contents[0].contents[1].string.split('·') if x.strip()][0]
             # news['publish_time'] = time.mktime(time.strptime(news['publish_time'], '%Y-%m-%d'))
             text = ""
-            news['tags'] = []
+            news['companies'] = []
             for child in soup.div.contents[1:]:
                 t = child.string
                 if t == None:
@@ -115,7 +115,7 @@ class ChinaipoNewsSpider(scrapy.Spider):
              
 
                     if not is_deleted:
-                        [news['tags'].append({'name': x.string,'id': re.search(r'\d+', x['href']).group()}) for x in tc if x.name=='a' and x.string and x.string.find('新三板')==-1 and re.search(r'\d+', x['href'])]
+                        [news['companies'].append({'short_name': x.string,'stock_id': re.search(r'\d+', x['href']).group()}) for x in tc if x.name=='a' and x.string and x.string.find('新三板')==-1 and re.search(r'\d+', x['href'])]
                         t = ''.join([x.strip() for x in child.stripped_strings if x])
                 else:
                     if t.find('本文为新三板在线原创稿件，转载需注明出处和作者，否则视为侵权') == -1:

@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 
-# Define your item pipelines here
-#
-# Don't forget to add your pipeline to the ITEM_PIPELINES setting
-# See: https://doc.scrapy.org/en/latest/topics/item-pipeline.html
-from scrapy.exceptions import DropItem
-from yuqing_spider.spiders import Stock
-from yuqing_spider.spiders import Article
+
+
+import datetime
 
 import pymysql
-import datetime
+from scrapy.exceptions import DropItem
+
+from yuqing_spider.db import MysqlDb
+from yuqing_spider.spiders import Article, Stock
 
 
 class DuplicatesStockPipeline(object):
@@ -116,36 +115,30 @@ class MysqlArticlePipeline(object):
         if isinstance(item, Article):
             try:
                 with self.client.cursor() as cursor:
-                    sql = """INSERT IGNORE INTO `article`(`title`, `thumb_img`, `url`, `description`, `publish_time`, `text`, `create_time`, `source_site`, `body`) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s)
-                    """
-                    number = cursor.execute(sql, (item['title'], item['thumb_img'], item['url'], item['description'], item['publish_time'],
-                                                  item['text'], datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"), item['source_site'], item['body'],))
-                    if number:
-                        cursor.execute('SELECT last_insert_id()')
-                        article_id, = cursor.fetchone()
-         
-                        sql1 = "SELECT `id`FROM `company` WHERE `stock_id`=%s"
-                        sql2 = "INSERT INTO `company_article`(`company_id`, `article_id`) VALUES (%s,%s)"
-                        sql3 = "INSERT INTO `employee_article`(`employee_id`, `article_id`, `is_read`, `is_invalid`) VALUES (%s,%s,%s,%s)"
-                        sql4 = "SELECT `employee_id` FROM `follow_company` WHERE `company_id`=%s AND `is_follow`=1"
-                        sql5 ="SELECT `id`FROM `company` WHERE `short_name`=%s"
-                        for sn in item['tags']:
-                            if 'id' in sn:
-                                number = cursor.execute(sql1, (sn['id']))
-                            else:
-                                number = cursor.execute(sql5, (sn['name']))
-                            
-                            if number:
-                                company_id, = cursor.fetchone()
-                                cursor.execute(sql2, (company_id, article_id))
-                                number = cursor.execute(sql4, (company_id))
-                                if number:
-                                    row3 = cursor.fetchall()
-                                    for employee_id, in row3:
-                                        cursor.execute(sql3, (employee_id, article_id, False, False))
-                            else:
-                                print(sn)
-                        
+                    db = MysqlDb(cursor)
+
+                    number, article_id = db.InsertArticle(item)
+                    if number and article_id:
+                        if "companies" in item:
+                            for company in item['companies']:
+                                if "stock_id" in company:
+                                    number, company_id = db.FetchCompanyIdByStockId(company['stock_id'])
+                                elif "short_name" in company:
+                                    number, company_id = db.FetchCompanyIdByShortName(company['short_name'])
+                                
+                                if company_id:
+                                    db.InsertCompanyArticle(company_id, article_id)
+                                    employee_ids = db.FetchFollowCompanyEmployeeId(company_id)
+                                    for employee_id in employee_ids:
+                                        db.InsertEmployeeArticle(employee_id, article_id)
+
+
+                        if "industries" in item:
+                            for industry in item['industries']:
+                                db.InsertIndustryArticle(industry['id'], article_id)
+                                employee_ids = db.FetchFollowIndustryEmployeeId(industry['id'])
+                                for employee_id in employee_ids:
+                                    db.InsertEmployeeArticle(employee_id, article_id)
 
                 self.client.commit()
             except Exception as e:
