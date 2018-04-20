@@ -6,7 +6,7 @@
 # https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-import urllib3
+import requests
 import logging
 
 logger = logging.getLogger(__name__)
@@ -114,11 +114,40 @@ class ProxyIpMiddleware(object):
         self.ip = ip
 
     def process_request(self, request, spider):
-        http = urllib3.PoolManager()
-        r = http.request(
-            'GET', 'http://proxy-pool.c2fd1643d9abe4d9fb2887ea58a7a3202.cn-hangzhou.alicontainer.com/get/')
-        ip = r.data.decode('utf-8').strip()
-        if ip:
-            logger.debug('Current Proxy Ip: %s' % ip)
-            request.meta["proxy"] = "http://"+ip
-        r.close()
+        for index in range(5): 
+            r = requests.get('http://proxy-pool.c2fd1643d9abe4d9fb2887ea58a7a3202.cn-hangzhou.alicontainer.com/get/')
+            if r.ok:
+                ip = r.text
+                proxy_ip = "http://{proxy}".format(proxy=ip)
+                proxies = {"http": proxy_ip}
+                try:
+                    r = requests.get( 'http://httpbin.org/ip', proxies=proxies, timeout=20, verify=False)
+                    if r.ok:
+                        logger.debug('Current Proxy Ip: %s ok, %s' % (ip, r.text))
+                        request.meta["proxy"] = proxy_ip
+                        break
+                    else:
+                        logger.warning('Current Proxy Ip: %s fill' % ip)
+                except Exception:
+                    logger.error('Current Proxy Ip: %s fill' % ip)
+                    requests.get('http://proxy-pool.c2fd1643d9abe4d9fb2887ea58a7a3202.cn-hangzhou.alicontainer.com/delete/?proxy={0}'.format(ip))
+                    
+            
+        # ip = r.data.decode('utf-8').strip()
+        # if ip:
+        #     http.request('GET', 'http://httpbin.org/ip', proxies=proxies)
+        #     logger.debug('Current Proxy Ip: %s' % ip)
+        #     request.meta["proxy"] = "http://"+ip
+        # r.close()
+    
+    def process_exception(self, request, exception, spider):
+        pass
+        # ip = str(request.meta["proxy"]).replace('http://','')
+        # if ip:
+        #     http = urllib3.PoolManager()
+        #     r = http.request('GET', 'http://proxy-pool.c2fd1643d9abe4d9fb2887ea58a7a3202.cn-hangzhou.alicontainer.com/delete/?proxy={0}'.format(ip))
+        #     logger.debug('{0} deleted {1}'.format(ip, r.data.decode('utf-8')))
+        #     r.close()
+    
+    # def process_response(self, request, response, spider):
+    #     print('这里这里' )
