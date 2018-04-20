@@ -128,8 +128,13 @@ class MysqlArticlePipeline(object):
                         sql2 = "INSERT INTO `company_article`(`company_id`, `article_id`) VALUES (%s,%s)"
                         sql3 = "INSERT INTO `employee_article`(`employee_id`, `article_id`, `is_read`, `is_invalid`) VALUES (%s,%s,%s,%s)"
                         sql4 = "SELECT `employee_id` FROM `follow_company` WHERE `company_id`=%s AND `is_follow`=1"
+                        sql5 ="SELECT `id`FROM `company` WHERE `short_name`=%s"
                         for sn in item['tags']:
-                            number = cursor.execute(sql1, (sn['id']))
+                            if 'id' in sn:
+                                number = cursor.execute(sql1, (sn['id']))
+                            else:
+                                number = cursor.execute(sql5, (sn['name']))
+                            
                             if number:
                                 company_id, = cursor.fetchone()
                                 cursor.execute(sql2, (company_id, article_id))
@@ -140,7 +145,6 @@ class MysqlArticlePipeline(object):
                                         cursor.execute(sql3, (employee_id, article_id, False, False))
                             else:
                                 print(sn)
-                            
                         
 
                 self.client.commit()
