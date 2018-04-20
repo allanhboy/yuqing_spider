@@ -60,9 +60,9 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Enable or disable extensions
 # See https://doc.scrapy.org/en/latest/topics/extensions.html
-#EXTENSIONS = {
-#    'scrapy.extensions.telnet.TelnetConsole': None,
-#}
+EXTENSIONS = {
+   'scrapy.extensions.telnet.TelnetConsole': None,
+}
 
 # Configure item pipelines
 # See https://doc.scrapy.org/en/latest/topics/item-pipeline.html
@@ -95,24 +95,30 @@ ITEM_PIPELINES = {
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
 LOG_LEVEL = "INFO"
+# LOG_FILE = "log.txt"
+# LOG_ENCODING = "utf-8"
 
+DOWNLOAD_DELAY = 5
 
+RETRY_ENABLED = True
 
-STOCK_MYSQL_HOST = env_dist.get('STOCK_MYSQL_HOST')
-STOCK_MYSQL_PASSWD = env_dist.get('STOCK_MYSQL_PASSWD')
-STOCK_MYSQL_DB = env_dist.get('STOCK_MYSQL_DB')
+DOWNLOAD_TIMEOUT = 20
 
-ARTICLE_MYSQL_HOST = env_dist.get('ARTICLE_MYSQL_HOST')
-ARTICLE_MYSQL_PASSWD = env_dist.get('ARTICLE_MYSQL_PASSWD')
-ARTICLE_MYSQL_DB = env_dist.get('ARTICLE_MYSQL_DB')
+STOCK_MYSQL_HOST = env_dist.get('STOCK_MYSQL_HOST', 'localhost')
+STOCK_MYSQL_PASSWD = env_dist.get('STOCK_MYSQL_PASSWD', 'addie5kaiK3')
+STOCK_MYSQL_DB = env_dist.get('STOCK_MYSQL_DB', 'yuqing')
+
+ARTICLE_MYSQL_HOST = env_dist.get('ARTICLE_MYSQL_HOST', 'localhost')
+ARTICLE_MYSQL_PASSWD = env_dist.get('ARTICLE_MYSQL_PASSWD', 'addie5kaiK3')
+ARTICLE_MYSQL_DB = env_dist.get('ARTICLE_MYSQL_DB', 'yuqing')
 
 # Enables scheduling storing requests queue in redis.
-SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+# SCHEDULER = "scrapy_redis.scheduler.Scheduler"
 
 # Ensure all spiders share same duplicates filter through redis.
-DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+# DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
 
 # Don't cleanup redis queues, allows to pause/resume crawls.
-SCHEDULER_PERSIST = True
+# SCHEDULER_PERSIST = True
 
-REDIS_URL = env_dist.get("REDIS_URL")
+# REDIS_URL = env_dist.get("REDIS_URL")
