@@ -48,14 +48,14 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    'yuqing_spider.middlewares.YuqingSpiderSpiderMiddleware': 543,
-#}
+SPIDER_MIDDLEWARES = {
+   'yuqing_spider.middlewares.DeltaFetchMiddleware': 543,
+}
 
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-   'yuqing_spider.middlewares.ProxyIpMiddleware': 90,
+#    'yuqing_spider.middlewares.ProxyIpDownloaderMiddleware': 90,
 }
 
 # Enable or disable extensions
@@ -111,6 +111,12 @@ STOCK_MYSQL_DB = env_dist.get('STOCK_MYSQL_DB', 'yuqing')
 ARTICLE_MYSQL_HOST = env_dist.get('ARTICLE_MYSQL_HOST', 'localhost')
 ARTICLE_MYSQL_PASSWD = env_dist.get('ARTICLE_MYSQL_PASSWD', 'addie5kaiK3')
 ARTICLE_MYSQL_DB = env_dist.get('ARTICLE_MYSQL_DB', 'yuqing')
+
+DELTA_FETCH_ENABLED = env_dist.get('DELTA_FETCH_ENABLED', True)
+DELTA_FETCH_REDIS_HOST = env_dist.get('DELTA_FETCH_REDIS_HOST', 'localhost')
+DELTA_FETCH_REDIS_PORT = env_dist.get('DELTA_FETCH_REDIS_PORT', 6379)
+DELTA_FETCH_REDIS_DB = env_dist.get('DELTA_FETCH_REDIS_DB', 0)
+DELTA_FETCH_REDIS_PASSWORD = env_dist.get('DELTA_FETCH_REDIS_PASSWORD', None)
 
 # Enables scheduling storing requests queue in redis.
 # SCHEDULER = "scrapy_redis.scheduler.Scheduler"
