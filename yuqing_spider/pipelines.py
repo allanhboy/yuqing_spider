@@ -10,6 +10,8 @@ from scrapy.exceptions import DropItem
 from yuqing_spider.db import MysqlDb
 from yuqing_spider.spiders import Article, Stock
 
+import logging
+logger = logging.getLogger(__name__)
 
 class DuplicatesStockPipeline(object):
     def __init__(self):
@@ -62,7 +64,7 @@ class MysqlStockPipeline(object):
                         sql, (item['company_name'], item['short_name'], True, item['url'], item['id'], item['category1'], item['category2']))
                 self.client.commit()
             except Exception as e:
-                print('出问题了', e)
+                logger.error(e)
             finally:
                 return item
         else:
@@ -142,7 +144,7 @@ class MysqlArticlePipeline(object):
 
                 self.client.commit()
             except Exception as e:
-                print('出问题了', e)
+                logger.error(e)
             finally:
                 return item
         else:
