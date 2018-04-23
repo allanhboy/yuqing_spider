@@ -119,6 +119,15 @@ class ProxyIpDownloaderMiddleware(object):
     def __init__(self, ip=''):
         self.ip = ip
 
+    @classmethod
+    def from_crawler(cls, crawler):
+        s = crawler.settings
+        if not s.getbool('PROXY_IP_ENABLED'):
+            raise NotConfigured
+            
+        o = cls(ip='')
+        return o
+
     def process_request(self, request, spider):
         for index in range(5): 
             r = requests.get('http://proxy-pool.cd641dc781add4bc6b8ed119cee669cb7.cn-hangzhou.alicontainer.com/get/')

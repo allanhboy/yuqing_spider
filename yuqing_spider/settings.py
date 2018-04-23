@@ -118,6 +118,7 @@ DELTA_FETCH_REDIS_PORT = env_dist.get('DELTA_FETCH_REDIS_PORT', 6379)
 DELTA_FETCH_REDIS_DB = env_dist.get('DELTA_FETCH_REDIS_DB', 0)
 DELTA_FETCH_REDIS_PASSWORD = env_dist.get('DELTA_FETCH_REDIS_PASSWORD', None)
 
+PROXY_IP_ENABLED = env_dist.get('PROXY_IP_ENABLED', True)
 # Enables scheduling storing requests queue in redis.
 # SCHEDULER = "scrapy_redis.scheduler.Scheduler"
 
