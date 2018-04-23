@@ -55,7 +55,7 @@ SPIDER_MIDDLEWARES = {
 # Enable or disable downloader middlewares
 # See https://doc.scrapy.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-#    'yuqing_spider.middlewares.ProxyIpDownloaderMiddleware': 90,
+   'yuqing_spider.middlewares.ProxyIpDownloaderMiddleware': 90,
 }
 
 # Enable or disable extensions

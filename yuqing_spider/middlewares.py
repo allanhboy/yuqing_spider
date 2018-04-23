@@ -121,7 +121,7 @@ class ProxyIpDownloaderMiddleware(object):
 
     def process_request(self, request, spider):
         for index in range(5): 
-            r = requests.get('http://proxy-pool.c2fd1643d9abe4d9fb2887ea58a7a3202.cn-hangzhou.alicontainer.com/get/')
+            r = requests.get('http://proxy-pool.cd641dc781add4bc6b8ed119cee669cb7.cn-hangzhou.alicontainer.com/get/')
             if r.ok:
                 ip = r.text
                 proxy_ip = "http://{proxy}".format(proxy=ip)
@@ -136,7 +136,7 @@ class ProxyIpDownloaderMiddleware(object):
                         logger.warning('Current Proxy Ip: %s fill' % ip)
                 except Exception:
                     logger.error('Current Proxy Ip: %s fill' % ip)
-                    requests.get('http://proxy-pool.c2fd1643d9abe4d9fb2887ea58a7a3202.cn-hangzhou.alicontainer.com/delete/?proxy={0}'.format(ip))
+                    requests.get('http://proxy-pool.cd641dc781add4bc6b8ed119cee669cb7.cn-hangzhou.alicontainer.com/delete/?proxy={0}'.format(ip))
                     
             
         # ip = r.data.decode('utf-8').strip()
