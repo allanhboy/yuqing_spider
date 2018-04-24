@@ -34,6 +34,7 @@ def find_settings():
 
 @defer.inlineCallbacks
 def crawl(spider_name):
+    print('============crawl===========', spider_name)
     yield process.crawl(spider_name)
 
 
