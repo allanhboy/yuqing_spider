@@ -6,10 +6,11 @@ from importlib import import_module
 import pytz
 from apscheduler.schedulers.twisted import TwistedScheduler
 from apscheduler.triggers.cron import CronTrigger
-from scrapy.crawler import CrawlerProcess
+from scrapy.crawler import CrawlerProcess, CrawlerRunner
 from scrapy.settings import Settings
 from scrapy.utils.conf import closest_scrapy_cfg
-from twisted.internet import defer
+from twisted.internet import defer, reactor
+from scrapy.utils.log import configure_logging
 
 from six.moves.configparser import (NoOptionError, NoSectionError,
                                     SafeConfigParser)
@@ -32,10 +33,10 @@ def find_settings():
     return crawler_settings
 
 
-@defer.inlineCallbacks
-def crawl(spider_name):
-    print('============crawl===========', spider_name)
-    yield process.crawl(spider_name)
+# @defer.inlineCallbacks
+# def crawl(spider_name):
+#     print('============crawl===========', spider_name)
+#     yield process.crawl(spider_name)
 
 
 def parse_arguments():
@@ -64,19 +65,28 @@ def my_import(name):
 
 
 if __name__ == '__main__':
+    
     arguments = parse_arguments()
-
-    # sched = TwistedScheduler()
-
     settings = find_settings()
-    process = CrawlerProcess(settings=settings)
+    configure_logging(settings=settings)
+    runner = CrawlerRunner(settings)
+
+
+    @defer.inlineCallbacks
+    def crawl(spider_name):
+        yield runner.crawl(spider_name)
+
+    
+
+    sched = TwistedScheduler()
+
+   
 
     # if arguments.enable_date:
     #     sched.add_job(process.crawl, 'date', args=[arguments.name])
     # else:
     #     tz = pytz.timezone('Asia/Shanghai')
     #     sched.add_job(process.crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz), args=[arguments.name])
-
-    # sched.start()
-    process.crawl(arguments.name)
-    process.start(False)
+    sched.add_job(crawl, 'date', args=[arguments.name])
+    sched.start()
+    reactor.run()
