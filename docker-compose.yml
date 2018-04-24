@@ -1,0 +1,17 @@
+yuqing-spider-chinaiponews:
+  image: 'registry-vpc.cn-hangzhou.aliyuncs.com/syzb/yuqing_spider:latest'
+  environment:
+    - LANG=C.UTF-8
+    - GPG_KEY=0D96DF4D4110E5C43FBFB17F2D347EA6AA65421D
+    - STOCK_MYSQL_HOST=mysqlserver
+    - STOCK_MYSQL_PASSWD=djejeUJ3qj^su22
+    - ARTICLE_MYSQL_HOST=mysqlserver
+    - ARTICLE_MYSQL_PASSWD=djejeUJ3qj^su22
+    - DELTA_FETCH_REDIS_HOST=r-bp122fb3ae30f0e4.redis.rds.aliyuncs.com
+    - DELTA_FETCH_REDIS_DB=10
+    - DELTA_FETCH_REDIS_PASSWORD=dkjeoqaakH7HSh2hjdw
+    - PROXY_IP_ENABLED=False
+  labels:
+    aliyun.scale: '1'
+  entrypoint: ["python"]
+  command: ["run.py","-c","0 0-12 * * *"]

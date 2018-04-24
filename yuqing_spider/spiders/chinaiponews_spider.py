@@ -4,7 +4,7 @@ from scrapy.http import Request
 
 from scrapy_redis.spiders import RedisCrawlSpider
 
-import time
+# import time
 import datetime
 import json
 import re
@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
 from yuqing_spider.spiders import Article
-
+import pytz
 import logging
 logger = logging.getLogger(__name__)
 
@@ -38,6 +38,7 @@ class ChinaipoNewsSpider(scrapy.Spider):
     first_time = False
 
     def parse(self, response):
+        tz = pytz.timezone('Asia/Shanghai')
         page = response.meta.get('page', 1)
         
         next_page = True
@@ -50,10 +51,11 @@ class ChinaipoNewsSpider(scrapy.Spider):
 
             if not self.first_time:
                 time = ''.join([t.strip() for t in item.xpath('p/span/text()').extract_first().split('·') if t.strip()])
-                time = '{0}-{1}'.format(str(datetime.datetime.now().year),time)
+                now = datetime.datetime.now(tz)
+                time = '{0}-{1}'.format(str(now.year),time)
                 time = [int(t) for t in time.split('-')]
                 time = datetime.date(time[0], time[1], time[2])
-                today = datetime.date.today()
+                today = datetime.date(now.year, now.month, now.day)
                 next_page = next_page and (today == time)
             
             

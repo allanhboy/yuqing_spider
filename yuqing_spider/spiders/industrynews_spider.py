@@ -9,6 +9,7 @@ from scrapy.linkextractors import LinkExtractor
 
 from yuqing_spider.spiders import Article
 from yuqing_spider.unit import get_encoding
+import pymysql
 
 
 class IndustryNewsSpider(scrapy.Spider):
@@ -35,6 +36,17 @@ class IndustryNewsSpider(scrapy.Spider):
         self.start_urls.append(self.rule['url'])
 
         super(IndustryNewsSpider, self).__init__(*args, **kwargs)
+
+    def start_requests(self):
+        sql = """
+        SELECT a.`id`  as `industry_id`, a.`industry_name` , b.`site_name`,b.`url`, c.* FROM `industry`  a
+        JOIN `industry_spider_rule` b ON a.`id`=b.`industry_id`
+        JOIN `spider_rule` c ON c.`id`=b.`spider_rule_id` AND c.`enable`=1
+         """
+
+        return [
+            Request('http://news.gg-lb.com/news_more2-65b095fb--6b63678167506599-1.html', callback=self.parse)
+        ]
 
     def parse(self, response):
         for item in response.xpath(self.rule['list_xpath']):

@@ -13,7 +13,6 @@ from twisted.internet import defer
 
 from six.moves.configparser import (NoOptionError, NoSectionError,
                                     SafeConfigParser)
-from yuqing_spider.spiders.chinaiponews_spider import ChinaipoNewsSpider
 
 
 def find_settings():
@@ -29,30 +28,53 @@ def find_settings():
 
     module = import_module(project_settings)
     crawler_settings = Settings()
-    crawler_settings.setmodule(module,priority='project')
+    crawler_settings.setmodule(module, priority='project')
     return crawler_settings
 
+
 @defer.inlineCallbacks
-def crawl():
-    yield process.crawl(ChinaipoNewsSpider)
+def crawl(spider_name):
+    yield process.crawl(spider_name)
+
 
 def parse_arguments():
 
     parser = argparse.ArgumentParser(
         description='爬虫入口')
+
+    parser.add_argument('-n', '--name', dest='name',
+                        default='chinaiponews', 
+                        help='爬虫名称')
+    parser.add_argument('-d', '--enable_date', dest='enable_date', action='store_true', help='是否立即执行')
+
     parser.add_argument('-c', '--cron', dest='cron',
-                        default='0 8-20 * * *',
+                        default='0 8,11,17 * * *',
                         help='任务定时机制')
-    
+
     return parser.parse_args()
+
+
+def my_import(name):
+    components = name.split('.')
+    mod = __import__(components[0])
+    for comp in components[1:]:
+        mod = getattr(mod, comp)
+    return mod
+
 
 if __name__ == '__main__':
     arguments = parse_arguments()
-    tz = pytz.timezone('Asia/Shanghai')
+
     sched = TwistedScheduler()
+
     settings = find_settings()
-    process =  CrawlerProcess(settings=settings)
-    sched.add_job(crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz))
-    
+    process = CrawlerProcess(settings=settings)
+
+    if arguments.enable_date:
+        sched.add_job(crawl, 'date', args=[arguments.name])
+    else:
+        tz = pytz.timezone('Asia/Shanghai')
+        sched.add_job(crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz), args=[arguments.name])
+
     sched.start()
     process.start(False)
