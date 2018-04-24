@@ -94,7 +94,7 @@ ITEM_PIPELINES = {
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 
-LOG_LEVEL = "INFO"
+# LOG_LEVEL = "INFO"
 # LOG_FILE = "log.txt"
 # LOG_ENCODING = "utf-8"
 
@@ -118,7 +118,7 @@ DELTA_FETCH_REDIS_PORT = env_dist.get('DELTA_FETCH_REDIS_PORT', 6379)
 DELTA_FETCH_REDIS_DB = env_dist.get('DELTA_FETCH_REDIS_DB', 0)
 DELTA_FETCH_REDIS_PASSWORD = env_dist.get('DELTA_FETCH_REDIS_PASSWORD', None)
 
-PROXY_IP_ENABLED = env_dist.get('PROXY_IP_ENABLED', True)
+PROXY_IP_ENABLED = env_dist.get('PROXY_IP_ENABLED', False)
 # Enables scheduling storing requests queue in redis.
 # SCHEDULER = "scrapy_redis.scheduler.Scheduler"
 
