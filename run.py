@@ -65,28 +65,28 @@ def my_import(name):
     return mod
 
 
-if __name__ == '__main__':
+# if __name__ == '__main__':
 
-    arguments = parse_arguments()
-    settings = find_settings()
-    configure_logging(settings=settings)
-    runner = CrawlerRunner(settings)
+arguments = parse_arguments()
+settings = find_settings()
+configure_logging(settings=settings)
+runner = CrawlerRunner(settings)
 
-    @defer.inlineCallbacks
-    def crawl(spider_name):
-        yield print('======================', spider_name)
-        yield runner.crawl(spider_name)
+@defer.inlineCallbacks
+def crawl(spider_name):
+    yield print('======================', spider_name)
+    yield runner.crawl(spider_name)
 
-    sched = TwistedScheduler()
+sched = TwistedScheduler()
 
-    if arguments.enable_date:
-        sched.add_job(crawl, 'date', args=[arguments.name])
-    else:
-        tz = pytz.timezone('Asia/Shanghai')
-        sched.add_job(crawl, CronTrigger.from_crontab(
-            arguments.cron, timezone=tz), args=[arguments.name])
-    # sched.add_job(crawl, 'date', args=[arguments.name])
-    sched.daemonic = False
-    sched.start()
+if arguments.enable_date:
+    sched.add_job(crawl, 'date', args=[arguments.name])
+else:
+    tz = pytz.timezone('Asia/Shanghai')
+    sched.add_job(crawl, CronTrigger.from_crontab(
+        arguments.cron, timezone=tz), args=[arguments.name])
+# sched.add_job(crawl, 'date', args=[arguments.name])
+sched.daemonic = False
+sched.start()
 
-    reactor.run()
+reactor.run()
