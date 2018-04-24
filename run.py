@@ -45,9 +45,10 @@ def parse_arguments():
         description='爬虫入口')
 
     parser.add_argument('-n', '--name', dest='name',
-                        default='chinaiponews', 
+                        default='chinaiponews',
                         help='爬虫名称')
-    parser.add_argument('-d', '--enable_date', dest='enable_date', action='store_true', help='是否立即执行')
+    parser.add_argument('-d', '--enable_date',
+                        dest='enable_date', action='store_true', help='是否立即执行')
 
     parser.add_argument('-c', '--cron', dest='cron',
                         default='0 8,11,17 * * *',
@@ -65,30 +66,27 @@ def my_import(name):
 
 
 if __name__ == '__main__':
-    
+
     arguments = parse_arguments()
     settings = find_settings()
     configure_logging(settings=settings)
     runner = CrawlerRunner(settings)
 
-
     @defer.inlineCallbacks
     def crawl(spider_name):
         yield print('======================', spider_name)
         yield runner.crawl(spider_name)
-        
-
-    
 
     sched = TwistedScheduler()
-
-   
 
     if arguments.enable_date:
         sched.add_job(crawl, 'date', args=[arguments.name])
     else:
         tz = pytz.timezone('Asia/Shanghai')
-        sched.add_job(crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz), args=[arguments.name])
+        sched.add_job(crawl, CronTrigger.from_crontab(
+            arguments.cron, timezone=tz), args=[arguments.name])
     # sched.add_job(crawl, 'date', args=[arguments.name])
+    sched.daemonic = False
     sched.start()
+
     reactor.run()
