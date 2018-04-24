@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import argparse
 from importlib import import_module
 
+import pytz
 from apscheduler.schedulers.twisted import TwistedScheduler
 from apscheduler.triggers.cron import CronTrigger
 from scrapy.crawler import CrawlerProcess
@@ -12,8 +14,6 @@ from twisted.internet import defer
 from six.moves.configparser import (NoOptionError, NoSectionError,
                                     SafeConfigParser)
 from yuqing_spider.spiders.chinaiponews_spider import ChinaipoNewsSpider
-
-import argparse
 
 
 def find_settings():
@@ -48,11 +48,11 @@ def parse_arguments():
 
 if __name__ == '__main__':
     arguments = parse_arguments()
-    
+    tz = pytz.timezone('Asia/Shanghai')
     sched = TwistedScheduler()
     settings = find_settings()
     process =  CrawlerProcess(settings=settings)
-    sched.add_job(crawl, CronTrigger.from_crontab(arguments.cron))
+    sched.add_job(crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz))
     
     sched.start()
     process.start(False)
