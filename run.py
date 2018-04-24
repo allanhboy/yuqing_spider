@@ -78,15 +78,15 @@ def crawl(spider_name):
     yield runner.crawl(spider_name)
 
 sched = TwistedScheduler()
-
-if arguments.enable_date:
-    sched.add_job(crawl, 'date', args=[arguments.name])
-else:
-    tz = pytz.timezone('Asia/Shanghai')
-    sched.add_job(crawl, CronTrigger.from_crontab(
-        arguments.cron, timezone=tz), args=[arguments.name])
-# sched.add_job(crawl, 'date', args=[arguments.name])
 sched.daemonic = False
+# if arguments.enable_date:
+sched.add_job(crawl, 'date', args=[arguments.name])
+# else:
+#     tz = pytz.timezone('Asia/Shanghai')
+#     sched.add_job(crawl, CronTrigger.from_crontab(
+#         arguments.cron, timezone=tz), args=[arguments.name])
+sched.add_job(crawl, 'cron', hour='23', minute='56', args=[arguments.name])
+
 sched.start()
 
 reactor.run()
