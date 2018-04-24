@@ -72,10 +72,10 @@ if __name__ == '__main__':
     process = CrawlerProcess(settings=settings)
 
     if arguments.enable_date:
-        sched.add_job(crawl, 'date', args=[arguments.name])
+        sched.add_job(process.crawl, 'date', args=[arguments.name])
     else:
         tz = pytz.timezone('Asia/Shanghai')
-        sched.add_job(crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz), args=[arguments.name])
+        sched.add_job(process.crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz), args=[arguments.name])
 
     sched.start()
     process.start(False)
