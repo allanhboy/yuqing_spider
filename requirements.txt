@@ -6,3 +6,5 @@ urllib3
 goose3
 redis
 newspaper3k
+six
+apscheduler
