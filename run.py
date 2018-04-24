@@ -66,16 +66,17 @@ def my_import(name):
 if __name__ == '__main__':
     arguments = parse_arguments()
 
-    sched = TwistedScheduler()
+    # sched = TwistedScheduler()
 
     settings = find_settings()
     process = CrawlerProcess(settings=settings)
 
-    if arguments.enable_date:
-        sched.add_job(process.crawl, 'date', args=[arguments.name])
-    else:
-        tz = pytz.timezone('Asia/Shanghai')
-        sched.add_job(process.crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz), args=[arguments.name])
+    # if arguments.enable_date:
+    #     sched.add_job(process.crawl, 'date', args=[arguments.name])
+    # else:
+    #     tz = pytz.timezone('Asia/Shanghai')
+    #     sched.add_job(process.crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz), args=[arguments.name])
 
-    sched.start()
+    # sched.start()
+    process.crawl(arguments.name)
     process.start(False)
