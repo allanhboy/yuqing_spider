@@ -69,12 +69,13 @@ if __name__ == '__main__':
     arguments = parse_arguments()
     settings = find_settings()
     configure_logging(settings=settings)
-    runner = CrawlerRunner(settings)
+    # runner = CrawlerRunner(settings)
 
 
     @defer.inlineCallbacks
     def crawl(spider_name):
-        yield runner.crawl(spider_name)
+        # yield runner.crawl(spider_name)
+        yield print('======================', spider_name)
 
     
 
