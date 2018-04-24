@@ -38,6 +38,7 @@ class ChinaipoNewsSpider(scrapy.Spider):
     first_time = False
 
     def parse(self, response):
+        print('我来也.....')
         tz = pytz.timezone('Asia/Shanghai')
         page = response.meta.get('page', 1)
         
