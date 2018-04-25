@@ -49,6 +49,7 @@ class IndustryNewsSpider(scrapy.Spider):
         client = pymysql.connect(host=self.mysql_host, port=self.mysql_port, user=self.mysql_user,
                                  passwd=self.mysql_passwd, db=self.mysql_db, charset=self.mysql_charset)
 
+        requests = []
         with client.cursor() as cursor:
             cursor.execute(sql)
             rows = cursor.fetchall()
@@ -68,14 +69,11 @@ class IndustryNewsSpider(scrapy.Spider):
                     'publish_time_xpath': publish_time_xpath,
                     'next_page_xpath': next_page_xpath
                 }
-                yield Request(url, callback=self.parse, meta={'industry': industry, 'rule':rule})
+                requests.append(Request(url, callback=self.parse, meta={'industry': industry, 'rule':rule}))
                 
         client.close()
 
-        # return [
-        #     Request(
-        #         'http://news.gg-lb.com/news_more2-65b095fb--6b63678167506599-1.html', callback=self.parse)
-        # ]
+        return requests
 
     def parse(self, response):
         industry = response.meta['industry']
@@ -117,7 +115,7 @@ class IndustryNewsSpider(scrapy.Spider):
                 time = datetime.date(time[0], time[1], time[2])
                 today = datetime.date(now.year, now.month, now.day)
                 next_page = next_page and (today == time)
-
+                
             yield Request(news['url'], callback=self.parse_news, meta={'news': news, 'rule': rule})
 
         if next_page:
@@ -151,4 +149,4 @@ class IndustryNewsSpider(scrapy.Spider):
         news['body'] = response.body.decode(
             get_encoding(response.body), 'ignore')
 
-        return (Article(news))
+        return Article(news)
