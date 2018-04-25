@@ -112,6 +112,10 @@ ARTICLE_MYSQL_HOST = env_dist.get('ARTICLE_MYSQL_HOST', 'localhost')
 ARTICLE_MYSQL_PASSWD = env_dist.get('ARTICLE_MYSQL_PASSWD', 'addie5kaiK3')
 ARTICLE_MYSQL_DB = env_dist.get('ARTICLE_MYSQL_DB', 'yuqing')
 
+INDUSTRY_MYSQL_HOST = env_dist.get('INDUSTRY_MYSQL_HOST', 'localhost')
+INDUSTRY_MYSQL_PASSWD = env_dist.get('INDUSTRY_MYSQL_PASSWD', 'addie5kaiK3')
+INDUSTRY_MYSQL_DB = env_dist.get('INDUSTRY_MYSQL_DB', 'yuqing')
+
 DELTA_FETCH_ENABLED = env_dist.get('DELTA_FETCH_ENABLED', True)
 DELTA_FETCH_REDIS_HOST = env_dist.get('DELTA_FETCH_REDIS_HOST', 'localhost')
 DELTA_FETCH_REDIS_PORT = env_dist.get('DELTA_FETCH_REDIS_PORT', 6379)
