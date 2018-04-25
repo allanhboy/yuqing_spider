@@ -13,6 +13,8 @@ from scrapy.http import Request
 import yuqing_spider.spiders
 from yuqing_spider.unit import get_encoding
 
+import pymysql
+
 logger = logging.getLogger(__name__)
 
 
@@ -20,21 +22,39 @@ class BaiduNewsSpider(scrapy.Spider):
     name = "baidunews"
     # allowed_domains = ["chinaipo.com"]
     start_urls = [
-        # "https://news.baidu.com/news?tn=bdapinewsearch&word=%E6%97%A5%E6%98%8C%E5%8D%87&pn=0&rn=50&ct=0",
-        # "http://news.163.com/18/0118/09/D8E3I5NR00014AEE.html",
-        # "http://www.my.gov.cn/jiangyou/288798823663271936/20180314/2224291.html"
-        # "http://www.ocn.com.cn/touzi/chanye/201801/vszqt19083617.shtml",
-        # "http://www.sxrb.com/sxxww/dspd/ycpd/ycxw/7392687.shtml",
-        # "http://www.aknews.gov.cn/news/zhengwu/zhaojunmin/2018-04-16/338467.html"
     ]
+
+
     def __init__(self, *args, **kwargs):
-        self.keywords = '日昌升'
+        # self.mysql_host = kwargs['mysql_host']
+        # self.mysql_port = kwargs['mysql_port']
+        # self.mysql_user = kwargs['mysql_user']
+        # self.mysql_passwd = kwargs['mysql_passwd']
+        # self.mysql_db = kwargs['mysql_db']
+        # self.mysql_charset = kwargs['mysql_charset']
+        self.keywords = kwargs['keywords']
 
         super(BaiduNewsSpider, self).__init__(*args, **kwargs)
 
+    # @classmethod
+    # def from_crawler(cls, crawler):
+    #     mysql_host = crawler.settings.get('INDUSTRY_MYSQL_HOST')
+    #     mysql_port = crawler.settings.get('INDUSTRY_MYSQL_PORT', 3306)
+    #     mysql_user = crawler.settings.get('INDUSTRY_MYSQL_USER', 'root')
+    #     mysql_passwd = crawler.settings.get('INDUSTRY_MYSQL_PASSWD')
+    #     mysql_db = crawler.settings.get('INDUSTRY_MYSQL_DB')
+    #     mysql_charset = crawler.settings.get('INDUSTRY_MYSQL_CHARSET', 'utf8')
+    #     return cls(mysql_host=mysql_host, mysql_port=mysql_port, mysql_user=mysql_user, mysql_passwd=mysql_passwd, mysql_db=mysql_db, mysql_charset=mysql_charset)
+
     def start_requests(self):
+        # client = pymysql.connect(host=self.mysql_host, port=self.mysql_port,                    user=self.mysql_user,passwd=self.mysql_passwd, db=self.mysql_db, charset=self.mysql_charset)
+        # sql ="SELECT * FROM `company` WHERE `is_chinaipo`=0"
+        # with client.cursor() as cursor:
+
+
         return [
-            Request('https://news.baidu.com/news?tn=bdapinewsearch&word={0}&pn=0&rn=50&ct=0'.format(self.keywords), callback=self.parse_baidu)
+            Request('https://news.baidu.com/news?tn=bdapinewsearch&word={0}&pn=0&rn=50&ct=0'.format(
+                self.keywords), callback=self.parse_baidu)
         ]
 
     def parse_baidu(self, response):
@@ -45,7 +65,7 @@ class BaiduNewsSpider(scrapy.Spider):
 
     def parse_news(self, response):
         item = response.meta['item']
-       
+
         body = response.body.decode(get_encoding(response.body), 'ignore')
 
         article = Article(item['url'], language='zh')
