@@ -67,15 +67,18 @@ runner = CrawlerRunner(settings)
 
 
 @defer.inlineCallbacks
-def crawl(spider_name):
-    yield runner.crawl(spider_name)
+def crawl():
+    yield runner.crawl('industrynews')
+    yield runner.crawl('chinaiponews')
+    # yield runner.crawl('chinaipo')
+    
 
 
 sched = TwistedScheduler()
 sched.daemonic = False
 tz = pytz.timezone('Asia/Shanghai')
-sched.add_job(crawl, CronTrigger.from_crontab(
-    arguments.cron, timezone=tz), args=[arguments.name])
+sched.add_job(crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz))
+# sched.add_job(crawl, 'date')
 
 sched.start()
 reactor.run()

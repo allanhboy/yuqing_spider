@@ -19,10 +19,6 @@ class IndustryNewsSpider(scrapy.Spider):
     first_time = False
 
     def __init__(self, *args, **kwargs):
-        print('================================')
-        print(args)
-        print(kwargs)
-        print('================================')
         self.mysql_host = kwargs['mysql_host']
         self.mysql_port = kwargs['mysql_port']
         self.mysql_user = kwargs['mysql_user']
