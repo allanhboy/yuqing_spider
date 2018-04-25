@@ -32,13 +32,6 @@ def find_settings():
     crawler_settings.setmodule(module, priority='project')
     return crawler_settings
 
-
-# @defer.inlineCallbacks
-# def crawl(spider_name):
-#     print('============crawl===========', spider_name)
-#     yield process.crawl(spider_name)
-
-
 def parse_arguments():
 
     parser = argparse.ArgumentParser(
@@ -75,19 +68,14 @@ runner = CrawlerRunner(settings)
 
 @defer.inlineCallbacks
 def crawl(spider_name):
-    yield print('======================', spider_name)
     yield runner.crawl(spider_name)
 
 
 sched = TwistedScheduler()
 sched.daemonic = False
-# if arguments.enable_date:
-# sched.add_job(crawl, 'date', args=[arguments.name])
-# else:
 tz = pytz.timezone('Asia/Shanghai')
 sched.add_job(crawl, CronTrigger.from_crontab(
     arguments.cron, timezone=tz), args=[arguments.name])
-# sched.add_job(crawl, 'cron', hour='23', minute='56', args=[arguments.name])
 
 sched.start()
 reactor.run()
