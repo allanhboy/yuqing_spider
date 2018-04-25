@@ -8,3 +8,4 @@ redis
 newspaper3k
 six
 apscheduler
+nltk
