@@ -9,5 +9,7 @@ RUN pip3 install -r requirements.txt
 RUN echo "Asia/Shanghai" > /etc/timezone && \
 dpkg-reconfigure -f noninteractive tzdata
 
+EXPOSE 8080
+
 ENTRYPOINT ["scrapy", "crawl"]
 CMD ["chinaiponews"]
