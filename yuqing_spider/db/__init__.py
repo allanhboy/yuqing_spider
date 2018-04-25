@@ -38,9 +38,9 @@ class MysqlDb:
 
         number = self.__cursor.execute(
             "SELECT `employee_id` FROM `follow_industry` WHERE `industry_id`=%s AND `is_follow`=1", (industry_id,))
-
+            
         if number:
-            row3, = self.__cursor.fetchall()
+            row3 = self.__cursor.fetchall()
             return [employee_id for employee_id, in row3]
         else:
             return []
@@ -74,7 +74,7 @@ class MysqlDb:
             "SELECT `employee_id` FROM `follow_company` WHERE `company_id`=%s AND `is_follow`=1", (company_id,))
 
         if number:
-            row3, = self.__cursor.fetchall()
+            row3 = self.__cursor.fetchall()
             return [employee_id for employee_id, in row3]
         else:
             return []
