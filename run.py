@@ -82,7 +82,7 @@ def crawl(spider_name):
 sched = TwistedScheduler()
 sched.daemonic = False
 # if arguments.enable_date:
-sched.add_job(crawl, 'date', args=[arguments.name])
+# sched.add_job(crawl, 'date', args=[arguments.name])
 # else:
 tz = pytz.timezone('Asia/Shanghai')
 sched.add_job(crawl, CronTrigger.from_crontab(
