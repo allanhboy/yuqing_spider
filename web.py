@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from scrapy.crawler import CrawlerRunner
-from twisted.internet import defer
-from twisted.web import resource
+from twisted.internet import defer, reactor
+from twisted.web import resource, server
 
 from utils import find_settings
+from twisted.internet.task import deferLater
+
 
 
 @defer.inlineCallbacks
@@ -20,11 +22,11 @@ class SimpleWeb(resource.Resource):
         super(SimpleWeb, self).__init__()
 
     isLeaf = True
-
+    
     def render_GET(self, request):
-        keywords = request.args[b'keywords'][0].decode('utf-8')
-        self.scheduler.add_job(crawl, 'date', args=[keywords])
-
-        request.setHeader("Content-Type", "text/html; charset=utf-8")
-        return ''.encode('utf-8')
+        keywords = request.args.get(b'keywords')
+        if keywords:
+            keywords = [k.decode('utf-8') for k in keywords][0]
+            crawl(keywords)
+        return 'ok'.encode('utf-8')
 
