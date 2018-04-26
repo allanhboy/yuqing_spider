@@ -5,6 +5,7 @@ from twisted.web import resource, server
 
 from utils import find_settings
 from twisted.internet.task import deferLater
+from send_template import send_template
 
 
 
@@ -13,6 +14,7 @@ def crawl(keywords):
     settings = find_settings()
     runner = CrawlerRunner(settings)
     yield runner.crawl('baidunews', keywords=keywords)
+    send_template(settings)
 
 
 class SimpleWeb(resource.Resource):
@@ -22,7 +24,7 @@ class SimpleWeb(resource.Resource):
         super(SimpleWeb, self).__init__()
 
     isLeaf = True
-    
+
     def render_GET(self, request):
         keywords = request.args.get(b'keywords')
         if keywords:
