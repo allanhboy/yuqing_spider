@@ -10,6 +10,7 @@ from scrapy.utils.log import configure_logging
 from twisted.internet import defer, endpoints, reactor
 from twisted.web import server
 
+from send_template import send_template
 from utils import find_settings
 from web import SimpleWeb
 
@@ -46,6 +47,7 @@ def crawl():
     yield runner.crawl('industrynews')
     yield runner.crawl('chinaiponews')
     # yield runner.crawl('chinaipo')
+    send_template(settings)
     
 
 
