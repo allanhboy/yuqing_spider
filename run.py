@@ -56,6 +56,9 @@ if __name__ == "__main__":
     sched.add_job(crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz))
     # sched.add_job(crawl, 'date', run_date=datetime.datetime.now() +
     #             datetime.timedelta(seconds=30))
+    site = server.Site(SimpleWeb(sched))
+    endpoint = endpoints.TCP4ServerEndpoint(reactor, 8080)
+    endpoint.listen(site)
 
 
     sched.start()

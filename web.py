@@ -6,7 +6,7 @@ from twisted.web import resource, server
 from utils import find_settings
 from twisted.internet.task import deferLater
 from send_template import send_template
-
+import datetime
 
 
 @defer.inlineCallbacks
@@ -29,6 +29,7 @@ class SimpleWeb(resource.Resource):
         keywords = request.args.get(b'keywords')
         if keywords:
             keywords = [k.decode('utf-8') for k in keywords][0]
-            crawl(keywords)
+            self.scheduler.add_job(crawl, 'date', args=[keywords], run_date=datetime.datetime.now() +
+                                   datetime.timedelta(seconds=10))
+            # crawl(keywords)
         return 'ok'.encode('utf-8')
-
