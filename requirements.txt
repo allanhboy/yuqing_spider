@@ -10,3 +10,4 @@ nltk
 celery
 billiard
 flask
+scrapyrt
