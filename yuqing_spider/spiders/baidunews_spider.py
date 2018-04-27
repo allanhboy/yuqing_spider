@@ -4,8 +4,8 @@ import logging
 import time
 
 import scrapy
-from goose3 import Goose
-from goose3.text import StopWordsChinese
+# from goose3 import Goose
+# from goose3.text import StopWordsChinese
 from newspaper import Article
 from scrapy.http import Request
 

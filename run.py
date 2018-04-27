@@ -13,6 +13,7 @@ from twisted.web import server
 from send_template import send_template
 from utils import find_settings
 from web import SimpleWeb
+import datetime
 
 
 def parse_arguments():
@@ -40,7 +41,6 @@ configure_logging(settings=settings)
 arguments = parse_arguments()
 
 
-
 @defer.inlineCallbacks
 def crawl():
     runner = CrawlerRunner(settings)
@@ -48,18 +48,15 @@ def crawl():
     yield runner.crawl('chinaiponews')
     # yield runner.crawl('chinaipo')
     send_template(settings)
-    
+
+if __name__ == "__main__":
+    sched = TwistedScheduler()
+    sched.daemonic = False
+    tz = pytz.timezone('Asia/Shanghai')
+    sched.add_job(crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz))
+    # sched.add_job(crawl, 'date', run_date=datetime.datetime.now() +
+    #             datetime.timedelta(seconds=30))
 
 
-sched = TwistedScheduler()
-sched.daemonic = False
-tz = pytz.timezone('Asia/Shanghai')
-sched.add_job(crawl, CronTrigger.from_crontab(arguments.cron, timezone=tz))
-# sched.add_job(crawl, 'date')
-
-site = server.Site(SimpleWeb(sched))
-endpoint = endpoints.TCP4ServerEndpoint(reactor, 8080)
-endpoint.listen(site)
-
-sched.start()
-reactor.run()
+    sched.start()
+    reactor.run()
