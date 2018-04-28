@@ -132,4 +132,4 @@ DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
 # Don't cleanup redis queues, allows to pause/resume crawls.
 SCHEDULER_PERSIST = True
 
-# REDIS_URL = env_dist.get("REDIS_URL")
+REDIS_URL = env_dist.get("REDIS_URL")
