@@ -10,7 +10,7 @@ RUN echo "Asia/Shanghai" > /etc/timezone && \
 dpkg-reconfigure -f noninteractive tzdata
 RUN python __init__.py
 
-EXPOSE 8080
+EXPOSE 5000
 
 ENTRYPOINT ["scrapy", "crawl"]
 CMD ["chinaiponews"]
