@@ -10,11 +10,26 @@ from scrapy_redis.connection import get_redis_from_settings
 from utils import find_settings
 
 env_dict = os.environ
-broker = env_dict.get('BROKER', 'redis://localhost:6379/1')
+broker = env_dict.get('BROKER', 'redis://localhost:6379/3')
 app = Celery('tasks', broker=broker)
 
-app.conf.timezone = 'Asia/Shanghai'
-
+app.conf.beat_schedule = {
+    'crawl_chinaiponews': {
+        'task': 'tasks.crawl_chinaiponews',
+        'schedule': crontab(hour='0-12', minute=0),
+        'args': (),
+    },
+    'crawl_industry': {
+        'task': 'tasks.crawl_industry',
+        'schedule': crontab(hour='*/4,0-12', minute=20),
+        'args': (),
+    },
+    'crawl_nonchinaiponews': {
+        'task': 'tasks.crawl_nonchinaiponews',
+        'schedule': crontab(hour='8,11,17', minute=40),
+        'args': (),
+    },
+}
 
 @app.task
 def crawl_industry():
@@ -94,16 +109,16 @@ def crawl_nonchinaiponews():
                 request_json, ensure_ascii=False))
 
 
-@app.on_after_configure.connect
-def setup_periodic_tasks(sender, **kwargs):
-    sender.add_periodic_task(
-        crontab(hour='*/4,8-20', minute=20), crawl_industry.s())
+# @app.on_after_configure.connect
+# def setup_periodic_tasks(sender, **kwargs):
+#     sender.add_periodic_task(
+#         crontab(hour='*/4,8-20', minute=20), crawl_industry.s())
 
-    sender.add_periodic_task(
-        crontab(hour='8-20', minute=0), crawl_chinaiponews.s())
+#     sender.add_periodic_task(
+#         crontab(hour='8-20', minute=0), crawl_chinaiponews.s())
 
-    sender.add_periodic_task(
-        crontab(hour='8,11,19', minute=40), crawl_nonchinaiponews.s())
+#     sender.add_periodic_task(
+#         crontab(hour='8,11,17', minute=40), crawl_nonchinaiponews.s())
 
 
 if __name__ == '__main__':
