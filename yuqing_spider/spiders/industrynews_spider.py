@@ -1,79 +1,43 @@
 # -*- coding: utf-8 -*-
+import datetime
+import json
 import re
 from urllib.parse import urljoin
 
+import pymysql
+import pytz
 import scrapy
 from bs4 import BeautifulSoup
 from scrapy.http import Request
 from scrapy.linkextractors import LinkExtractor
+from scrapy_redis.spiders import RedisSpider
+from scrapy_redis.utils import bytes_to_str
 
 from yuqing_spider.spiders import Article
 from yuqing_spider.unit import get_encoding
-import pymysql
-import datetime
-import pytz
 
-class IndustryNewsSpider(scrapy.Spider):
+
+class IndustryNewsSpider(RedisSpider):
     name = "industrynews"
-    start_urls = []
     first_time = False
+    pattern = re.compile(
+        r'((\d{2,4}-)?)\d{1,2}-\d{1,2}( \d{1,2}:\d{1,2}(:\d{1,2})?)?')
 
-    def __init__(self, *args, **kwargs):
-        self.mysql_host = kwargs['mysql_host']
-        self.mysql_port = kwargs['mysql_port']
-        self.mysql_user = kwargs['mysql_user']
-        self.mysql_passwd = kwargs['mysql_passwd']
-        self.mysql_db = kwargs['mysql_db']
-        self.mysql_charset = kwargs['mysql_charset']
-        self.pattern = re.compile(
-            r'((\d{2,4}-)?)\d{1,2}-\d{1,2}( \d{1,2}:\d{1,2}(:\d{1,2})?)?')
+    def make_request_from_data(self, data):
+        data = bytes_to_str(data, self.redis_encoding)
+        data = json.loads(data)
 
-        super(IndustryNewsSpider, self).__init__(*args, **kwargs)
+        url = data.get('url', None)
+        if url and not url.strip():
+            raise ValueError('url is required')
 
-    @classmethod
-    def from_crawler(cls, crawler):
-        mysql_host = crawler.settings.get('INDUSTRY_MYSQL_HOST')
-        mysql_port = crawler.settings.get('INDUSTRY_MYSQL_PORT', 3306)
-        mysql_user = crawler.settings.get('INDUSTRY_MYSQL_USER', 'root')
-        mysql_passwd = crawler.settings.get('INDUSTRY_MYSQL_PASSWD')
-        mysql_db = crawler.settings.get('INDUSTRY_MYSQL_DB')
-        mysql_charset = crawler.settings.get('INDUSTRY_MYSQL_CHARSET', 'utf8')
-        return cls(mysql_host=mysql_host, mysql_port=mysql_port, mysql_user=mysql_user, mysql_passwd=mysql_passwd, mysql_db=mysql_db, mysql_charset=mysql_charset)
+        industry = {'id': data.get('industry_id'),
+                    'industry_name': data.get('industry_name')}
+        data.pop('url')
+        data.pop('industry_id')
+        data.pop('industry_name')
 
-    def start_requests(self):
-        sql = """
-        SELECT a.`id`  as `industry_id`, a.`industry_name` , b.`site_name`,b.`url`, list_xpath,list_thumb_img_xpath,list_title_xpath,list_url_xpath,list_description_xpath,list_publish_time_xpath,body_xpath,publish_time_xpath,next_page_xpath FROM `industry`  a
-        JOIN `industry_spider_rule` b ON a.`id`=b.`industry_id`
-        JOIN `spider_rule` c ON c.`id`=b.`spider_rule_id` AND c.`enable`=1
-         """
-        client = pymysql.connect(host=self.mysql_host, port=self.mysql_port, user=self.mysql_user,
-                                 passwd=self.mysql_passwd, db=self.mysql_db, charset=self.mysql_charset)
-
-        requests = []
-        with client.cursor() as cursor:
-            cursor.execute(sql)
-            rows = cursor.fetchall()
-   
-            for industry_id, industry_name, site_name, url, list_xpath, list_thumb_img_xpath, list_title_xpath, list_url_xpath, list_description_xpath, list_publish_time_xpath, body_xpath, publish_time_xpath,next_page_xpath in rows:
-                industry = {'id': industry_id, 'industry_name': industry_name}
-                rule = {
-                    'site_name': site_name,
-                    'url': url,
-                    'list_xpath': list_xpath,
-                    'list_thumb_img_xpath': list_thumb_img_xpath,
-                    'list_title_xpath': list_title_xpath,
-                    'list_url_xpath': list_url_xpath,
-                    'list_description_xpath': list_description_xpath,
-                    'list_publish_time_xpath': list_publish_time_xpath,
-                    'body_xpath': body_xpath,
-                    'publish_time_xpath': publish_time_xpath,
-                    'next_page_xpath': next_page_xpath
-                }
-                requests.append(Request(url, callback=self.parse, meta={'industry': industry, 'rule':rule}))
-                
-        client.close()
-
-        return requests
+        return Request(url, dont_filter=True, meta={'industry': industry, 'rule': data})
 
     def parse(self, response):
         industry = response.meta['industry']
@@ -99,7 +63,6 @@ class IndustryNewsSpider(scrapy.Spider):
                 year = now.year
                 publish_time = '{0}-{1}'.format(year, publish_time)
 
-
             news = {
                 'thumb_img': urljoin(response.url, thumb_img),
                 'title': title,
@@ -109,13 +72,13 @@ class IndustryNewsSpider(scrapy.Spider):
                 'industries': [industry],
                 'source_site': rule['site_name']
             }
-            
+
             if not self.first_time:
                 time = [int(t) for t in re.split(' |-|:', publish_time)][:3]
                 time = datetime.date(time[0], time[1], time[2])
                 today = datetime.date(now.year, now.month, now.day)
                 next_page = next_page and (today == time)
-                
+
             yield Request(news['url'], callback=self.parse_news, meta={'news': news, 'rule': rule})
 
         if next_page:
