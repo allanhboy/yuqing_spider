@@ -1,81 +1,66 @@
 # -*- coding: utf-8 -*-
 import json
-import logging
 import time
 
-import scrapy
-# from goose3 import Goose
-# from goose3.text import StopWordsChinese
 from newspaper import Article
+from scrapy.exceptions import DontCloseSpider
 from scrapy.http import Request
+from scrapy_redis.spiders import RedisSpider
+from scrapy_redis.utils import bytes_to_str
 
-# from yuqing_spider.spiders import Article
-import yuqing_spider.spiders
-from yuqing_spider.unit import get_encoding
+from yuqing_spider.unit import get_encoding, send_template
 
-import pymysql
-
-logger = logging.getLogger(__name__)
+from . import Article as YuqingArticle
 
 
-class BaiduNewsSpider(scrapy.Spider):
+class BaiduNewsSpider(RedisSpider):
     name = "baidunews"
-    # allowed_domains = ["chinaipo.com"]
-    start_urls = [
-    ]
+    is_running = False
 
+    def make_request_from_data(self, data):
+        data = bytes_to_str(data, self.redis_encoding)
+        data = json.loads(data)
+        url = data.get('url', None)
+        if url and not url.strip():
+            raise ValueError('url is required')
 
-    def __init__(self, *args, **kwargs):
-        # self.mysql_host = kwargs['mysql_host']
-        # self.mysql_port = kwargs['mysql_port']
-        # self.mysql_user = kwargs['mysql_user']
-        # self.mysql_passwd = kwargs['mysql_passwd']
-        # self.mysql_db = kwargs['mysql_db']
-        # self.mysql_charset = kwargs['mysql_charset']
-        self.keywords = kwargs['keywords']
+        keywords = data.get('keywords', None)
+        if keywords and not keywords.strip():
+            raise ValueError('keywords is required')
 
-        super(BaiduNewsSpider, self).__init__(*args, **kwargs)
+        self.is_running = True
+        return Request(url, dont_filter=True, meta={'keywords': keywords})
 
-    # @classmethod
-    # def from_crawler(cls, crawler):
-    #     mysql_host = crawler.settings.get('INDUSTRY_MYSQL_HOST')
-    #     mysql_port = crawler.settings.get('INDUSTRY_MYSQL_PORT', 3306)
-    #     mysql_user = crawler.settings.get('INDUSTRY_MYSQL_USER', 'root')
-    #     mysql_passwd = crawler.settings.get('INDUSTRY_MYSQL_PASSWD')
-    #     mysql_db = crawler.settings.get('INDUSTRY_MYSQL_DB')
-    #     mysql_charset = crawler.settings.get('INDUSTRY_MYSQL_CHARSET', 'utf8')
-    #     return cls(mysql_host=mysql_host, mysql_port=mysql_port, mysql_user=mysql_user, mysql_passwd=mysql_passwd, mysql_db=mysql_db, mysql_charset=mysql_charset)
+    def spider_idle(self):
+        """Schedules a request if available, otherwise waits."""
+        # XXX: Handle a sentinel to close the spider.
+        if self.is_running:
+            self.is_running = False
+            send_template(self.crawler.settings)
 
-    def start_requests(self):
-        # client = pymysql.connect(host=self.mysql_host, port=self.mysql_port,                    user=self.mysql_user,passwd=self.mysql_passwd, db=self.mysql_db, charset=self.mysql_charset)
-        # sql ="SELECT * FROM `company` WHERE `is_chinaipo`=0"
-        # with client.cursor() as cursor:
+        self.schedule_next_requests()
+        raise DontCloseSpider
 
-
-        return [
-            Request('https://news.baidu.com/news?tn=bdapinewsearch&word={0}&pn=0&rn=50&ct=0'.format(
-                self.keywords), callback=self.parse_baidu)
-        ]
-
-    def parse_baidu(self, response):
+    def parse(self, response):
+        keywords = response.meta.get("keywords")
         res = json.loads(response.body, encoding='utf-8')
         if res['errno'] == 0 and 'data' in res and 'list' in res['data']:
             for item in res['data']['list']:
-                yield Request(item['url'], callback=self.parse_news, meta={'item': item})
+                yield Request(item['url'], callback=self.parse_news, dont_filter=False, meta={'item': item, 'keywords': keywords})
 
     def parse_news(self, response):
         item = response.meta['item']
-
+        keywords = response.meta.get("keywords")
         body = response.body.decode(get_encoding(response.body), 'ignore')
 
-        article = Article(item['url'], language='zh')
+        article = Article(item['url'], language='zh', fetch_images= False)
         article.download(input_html=body, title=item['title'])
         article.parse()
         article.nlp()
-        if article.text.find(self.keywords) == -1:
+        if article.text.find(keywords) == -1:
             pass
         else:
-            news = yuqing_spider.spiders.Article(
+            news = YuqingArticle(
                 title=article.title,
                 text=article.text,
                 body=body,
@@ -84,6 +69,6 @@ class BaiduNewsSpider(scrapy.Spider):
                 thumb_img=article.top_image,
                 url=item['url'],
                 description=article.summary,
-                companies=[{'short_name': self.keywords}],
+                companies=[{'short_name': keywords}],
                 source_site=item['author'])
             return news

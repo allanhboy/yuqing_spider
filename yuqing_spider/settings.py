@@ -49,7 +49,7 @@ ROBOTSTXT_OBEY = False
 # Enable or disable spider middlewares
 # See https://doc.scrapy.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
-   'yuqing_spider.middlewares.DeltaFetchMiddleware': 543,
+#    'yuqing_spider.middlewares.DeltaFetchMiddleware': 543,
 }
 
 # Enable or disable downloader middlewares
@@ -124,12 +124,12 @@ DELTA_FETCH_REDIS_PASSWORD = env_dist.get('DELTA_FETCH_REDIS_PASSWORD', None)
 
 PROXY_IP_ENABLED = env_dist.get('PROXY_IP_ENABLED', False)
 # Enables scheduling storing requests queue in redis.
-# SCHEDULER = "scrapy_redis.scheduler.Scheduler"
+SCHEDULER = "scrapy_redis.scheduler.Scheduler"
 
 # Ensure all spiders share same duplicates filter through redis.
-# DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
+DUPEFILTER_CLASS = "scrapy_redis.dupefilter.RFPDupeFilter"
 
 # Don't cleanup redis queues, allows to pause/resume crawls.
-# SCHEDULER_PERSIST = True
+SCHEDULER_PERSIST = True
 
 # REDIS_URL = env_dist.get("REDIS_URL")
