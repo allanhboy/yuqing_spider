@@ -21,12 +21,12 @@ app.conf.beat_schedule = {
     },
     'crawl_industry': {
         'task': 'tasks.crawl_industry',
-        'schedule': crontab(hour='*/4,0-12', minute=20),
+        'schedule': crontab(hour='0,4,8,12', minute=20),
         'args': (),
     },
     'crawl_nonchinaiponews': {
         'task': 'tasks.crawl_nonchinaiponews',
-        'schedule': crontab(hour='8,11,17', minute=40),
+        'schedule': crontab(hour='0,3,9', minute=40),
         'args': (),
     },
 }
