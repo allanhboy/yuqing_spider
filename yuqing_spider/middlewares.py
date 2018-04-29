@@ -189,23 +189,18 @@ class Data5uProxyIpDownloaderMiddleware(object):
                 'http://proxy-pool.cd641dc781add4bc6b8ed119cee669cb7.cn-hangzhou.alicontainer.com/get/')
             if r.ok:
                 self.ips = self.ips | set(r.text.split('\n'))
-
-        # print(spider.crawler)
         ip = random.choice(list(self.ips))
-        print(self.ips, ip)
         if ip:
             request.meta["proxy"] = "http://{proxy}".format(proxy=ip)
 
     def process_response(self, request, response, spider):
-        print("我来了", response.status, response.url)
         if response.status != 200:
             proxy_ip = request.meta.get("proxy")
-            print(proxy_ip)
             ip = proxy_ip and proxy_ip.replace("http://", "")
             if ip:
                 self.ips = {i for i in self.ips if i != ip}
                 requests.get(
-                        'http://proxy-pool.cd641dc781add4bc6b8ed119cee669cb7.cn-hangzhou.alicontainer.com/delete/?proxy={0}'.format(ip))
+                    'http://proxy-pool.cd641dc781add4bc6b8ed119cee669cb7.cn-hangzhou.alicontainer.com/delete/?proxy={0}'.format(ip))
             r = request.copy()
             r.meta.pop("proxy")
             return r
@@ -213,16 +208,18 @@ class Data5uProxyIpDownloaderMiddleware(object):
             return response
 
     def process_exception(self, request, exception, spider):
-        print("出问题了", exception)
-        print("出问题了", request.url, request.meta["proxy"])
+        logger.error('%s,%s' % (request.url, exception))
         proxy_ip = request.meta.get("proxy")
         ip = proxy_ip and proxy_ip.replace("http://", "")
         if ip:
             self.ips = {i for i in self.ips if i != ip}
             requests.get(
-                        'http://proxy-pool.cd641dc781add4bc6b8ed119cee669cb7.cn-hangzhou.alicontainer.com/delete/?proxy={0}'.format(ip))
-        
-    
+                'http://proxy-pool.cd641dc781add4bc6b8ed119cee669cb7.cn-hangzhou.alicontainer.com/delete/?proxy={0}'.format(ip))
+            
+            r = request.copy()
+            r.meta.pop("proxy")
+            return r
+
 
 class DeltaFetchMiddleware(object):
 
