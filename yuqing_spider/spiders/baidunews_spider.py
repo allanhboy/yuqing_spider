@@ -7,6 +7,7 @@ from scrapy.exceptions import DontCloseSpider
 from scrapy.http import Request
 from scrapy_redis.spiders import RedisSpider
 from scrapy_redis.utils import bytes_to_str
+from twisted.internet.threads import deferToThread
 
 from yuqing_spider.unit import get_encoding, send_template
 
@@ -27,7 +28,7 @@ class BaiduNewsSpider(RedisSpider):
         keywords = data.get('keywords', None)
         if keywords and not keywords.strip():
             raise ValueError('keywords is required')
-
+        self.keywords = keywords
         self.is_running = True
         return Request(url, dont_filter=True, meta={'keywords': keywords})
 
@@ -36,7 +37,8 @@ class BaiduNewsSpider(RedisSpider):
         # XXX: Handle a sentinel to close the spider.
         if self.is_running:
             self.is_running = False
-            send_template(self.crawler.settings)
+            deferToThread(send_template, self.crawler.settings)
+            # send_template(self.crawler.settings)
 
         self.schedule_next_requests()
         raise DontCloseSpider

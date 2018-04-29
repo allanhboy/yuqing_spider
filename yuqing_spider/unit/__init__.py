@@ -26,7 +26,7 @@ def get_encoding(s):
         return "UTF-8"
 
 
-def send_template(settings):
+def send_template(settings, name=None):
     mysql_host = settings.get('STOCK_MYSQL_HOST')
     mysql_port = settings.get('STOCK_MYSQL_PORT', 3306)
     mysql_user = settings.get('STOCK_MYSQL_USER', 'root')
@@ -46,10 +46,13 @@ def send_template(settings):
             """)
             if number:
                 rows = cursor.fetchall()
+                first_value = '您好,您关注的企业(行业)有新的动态'
+                if name:
+                    first_value = '您好,您关注的{0}有新的动态'.format(name)
                 for openid, count in rows:
                     data = {
                         "first": {
-                            "value": "您好,您关注的企业(行业)有新的舆情",
+                            "value": first_value,
                             "color": "#173177"
                         },
                         "keyword1": {
