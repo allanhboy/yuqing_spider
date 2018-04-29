@@ -222,7 +222,7 @@ class Data5uProxyIpDownloaderMiddleware(object):
             requests.get(
                         'http://proxy-pool.cd641dc781add4bc6b8ed119cee669cb7.cn-hangzhou.alicontainer.com/delete/?proxy={0}'.format(ip))
         
-
+    
 
 class DeltaFetchMiddleware(object):
 
